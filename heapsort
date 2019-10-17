@@ -3,77 +3,111 @@
 
 using namespace std;
 
-void swap(int &p1, int &p2)
+void swap(int &p1, int &p2)  //call by reference
 {
-    int temp = p1;
-    p1 = p2;
-    p2 = temp;
+	int temp = p1;
+	p1 = p2;
+	p2 = temp;
 }
 
-void MaxHeapify(vector<int> &array, int root, int length)
-{
+// 從右下方的子樹開始 往左做 Heapify 同一層做完後再往上 重複至每一層的子樹都做過一次
+void MaxHeapify (vector<int> &array, int root, int length)
+{	// root: 子樹的根節點, length: array 的 size 
+	cout << "root = " << root << ", length = " << length << endl;
+	int left = 2 * root,      // 子樹左節點的 index 
+		right = 2 * root + 1,     // 子樹右節點的 index 
+		largest;                // 子樹中 value 最大的節點的 index 
+	cout << "left = " << left << ", right = " << right << endl;
 
-    int left = 2*root,      // 取得left child
-    right = 2*root + 1,     // 取得right child
-    largest;                // largest用來記錄包含root與child, 三者之中Key最大的node
-
-    if (left <= length && array[left] > array[root])
-        largest = left;
-    else
-        largest = root;
-
-    if (right <= length && array[right] > array[largest])
-        largest = right;
-
-    if (largest != root) {                         // 如果目前root的Key不是三者中的最大
-        swap(array[largest], array[root]);         // 就調換root與三者中Key最大的node之位置
-        MaxHeapify(array, largest, length);        // 調整新的subtree成Max Heap
-    }
-}
-
-void BuildMaxHeap(vector<int> &array){
-
-    for (int i = (int)array.size()/2; i >= 1 ; i--) {
-        MaxHeapify(array, i, (int)array.size() - 1);     // length要減一, 因為heap從1開始存放資料
-    }
-}
-
-void HeapSort(vector<int> &array){
-
-    array.insert(array.begin(), 0);                     // 將index(0)閒置
-
-    BuildMaxHeap(array);                                // 將array調整成Max Heap
-
-    int size = (int)array.size() -1;                    // size用來記錄「目前要處理的矩陣」之長度
-    for (int i = (int)array.size() -1; i >= 2; i--) {
-        swap(array[1], array[i]);                       // 將最大值放到array的最後一個位置
-        size--;
-        MaxHeapify(array, 1, size);                     // 調整「忽略最後一個位置」的矩陣
-    }
-
-    array.erase(array.begin());                         // 將index(0)刪除
-}
-
-void PrintArray(vector<int> &array){
-    for (int i = 0; i < array.size(); i++)
+	if (right > length - 1)
 	{
-        cout << array[i] << " ";
-    }
-    cout << endl;
+		cout << "left_data = " << array[left] << ", right_data = out of range" << endl;
+	}
+	else
+	{
+		cout << "left_data = " << array[left] << ", right_data = " << array[right] << endl;
+	}
+	
+	// left 的 value 與 root 的 value 做比較 將 value 較大的節點的 index 寫入 largest 
+	if (left < length && array[left] > array[root])
+	{
+		largest = left;
+		cout << "largest = " << largest << endl;
+	}
+	else
+	{
+		largest = root;
+		cout << "largest = " << largest << endl;
+	}
+
+	// largest 的 value 與 right 的 value 做比較 將 value 較大的節點的 index 寫入 largest 
+	if (right < length && array[right] > array[largest])
+	{
+		largest = right;
+		cout << "largest = " << largest << endl;
+	}
+	cout << "=====================" << endl;
+
+	if (largest != root)
+	{                         // 如果目前 root 的 value 不是三者中的最大
+		swap(array[largest], array[root]);         // 就調換 root 與三者中 value 最大的節點的位置
+		//MaxHeapify(array, largest, length);			//可以不做 不知道為啥要多做這白工 
+	}
 }
 
-int main() {
+void BuildMaxHeap(vector<int> &array)
+{
+	for (int i = (int)array.size() / 2; i >= 1; i--)   // size / 2 為 "子樹的數量 + 1"
+	{
+       							   // 故第一次的 Heapify 會做白工 
+		cout << "i = " << i << ", ";
+		MaxHeapify(array, i, (int)array.size()); 
+	}
+}
 
-    int arr[] = {9, 4, 1, 6, 7, 3, 8, 2, 5};
-    vector<int> array(arr, arr+sizeof(arr)/sizeof(int));
+void HeapSort(vector<int> &array)
+{
 
-    cout << "original:\n";
-    PrintArray(array);
+	//array.insert(array.begin(), 0);                     // 在 array 的最前面插入 0 
+														// 故對應原來的 array 的 index 從 1 開始 
 
-    HeapSort(array);
+	BuildMaxHeap(array);                                // 初始化 將 array 調整成 Max Heap
+														// 以確保樹的 root 的 value 是最大的值 
+	cout << "\nAfter First Heapify:\n";
 
-    cout << "sorted:\n";
-    PrintArray(array);
+	int size = (int)array.size() - 1;
 
-    return 0;
+	for (int i = (int)array.size() - 1; i >= 2; i--)
+	{
+		swap(array[1], array[i]);                       // 將最大值放到 array 的最後一個位置
+		size--;
+		MaxHeapify(array, 1, size);                     // 調整「忽略最後一個位置」的矩陣
+	}
+
+	array.erase(array.begin());                         // 將插入的值刪除
+}
+
+void PrintArray(vector<int> &array)
+{
+	for (int i = 0; i < array.size(); i++)
+	{
+		cout << array[i] << " ";
+	}
+	cout << endl;
+}
+
+int main()
+{
+	int arr[] = { 9, 4, 1, 6, 7, 3, 8, 2, 5 };
+	vector<int> array(&arr[0], &arr[0] + sizeof(arr) / sizeof(int));
+
+	cout << "original:\n";
+	PrintArray(array);
+
+	HeapSort(array);
+
+	cout << "sorted:\n";
+	PrintArray(array);
+
+	return 0;
 }
